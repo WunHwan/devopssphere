@@ -2,16 +2,16 @@ package iam
 
 import (
 	"github.com/emicklei/go-restful"
-	"io.github/devopssphere/pkg/models/iam/am"
+	"io.github/devopssphere/pkg/models/iam/im"
 )
 
 type iamHandler struct {
-	am am.AccessManagementInterface
+	im *im.ManagementInterface
 }
 
-func NewIAMHandler(am am.AccessManagementInterface) *iamHandler {
+func NewIAMHandler(am *im.ManagementInterface) *iamHandler {
 	return &iamHandler{
-		am: am,
+		im: am,
 	}
 }
 

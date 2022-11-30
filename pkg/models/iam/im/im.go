@@ -1,29 +1,29 @@
-package am
+package im
 
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	sql "io.github/devopssphere/pkg/storage/iam/am"
+	sql "io.github/devopssphere/pkg/storage/iam/im"
 )
 
-type AccessManagementInterface interface {
+type ManagementInterface interface {
 	AddUser(email, password string) error
 	ResetPassword(email, oldPass, newPass string) error
 	DelUser(email string) error
 }
 
-type amOperator struct {
+type imOperator struct {
 	db *gorm.DB
 }
 
-func NewAMOperator(db *gorm.DB) AccessManagementInterface {
-	return amOperator{
+func NewIMOperator(db *gorm.DB) ManagementInterface {
+	return imOperator{
 		db: db,
 	}
 }
 
-func (a amOperator) AddUser(email, password string) error {
+func (a imOperator) AddUser(email, password string) error {
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		saltpass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
@@ -39,7 +39,7 @@ func (a amOperator) AddUser(email, password string) error {
 	})
 }
 
-func (a amOperator) ResetPassword(email, oldPass, newPass string) error {
+func (a imOperator) ResetPassword(email, oldPass, newPass string) error {
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// lookup user from email
 		user, err := sql.FindUser(tx, email)
@@ -63,7 +63,7 @@ func (a amOperator) ResetPassword(email, oldPass, newPass string) error {
 	})
 }
 
-func (a amOperator) DelUser(email string) error {
+func (a imOperator) DelUser(email string) error {
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// lookup user from email
 		existed, err := sql.ExistUser(tx, email)

@@ -1,0 +1,2 @@
+[database]
+dsn="zs0dbzxenyedwxifpew7:pscale_pw_rRagJbVVadDitxgnxm6VsUo980wjuTSU0JjqRL2RbpF@tcp(ap-northeast.connect.psdb.cloud:3306)/devopssphere?charset=utf8mb4&parseTime=True&loc=Local&tls=true"

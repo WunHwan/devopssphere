@@ -1,4 +1,4 @@
-package am
+package im
 
 import (
 	"gorm.io/gorm"
@@ -16,7 +16,6 @@ func SaveUser(tx *gorm.DB, user User) error {
 	if err := tx.Create(&user).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 

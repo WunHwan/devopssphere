@@ -10,7 +10,6 @@ import (
 )
 
 type ServerRunOptions struct {
-	ConfigFile              string
 	GenericServerRunOptions *genericoptions.ServerRunOptions
 	*apiServerConfig.Config
 
@@ -25,7 +24,7 @@ func NewServerRunOptions() *ServerRunOptions {
 	}
 }
 
-func (s *ServerRunOptions) NewAPIServer(stopch <-chan struct{}) (*apiserver.APIServer, error) {
+func (s *ServerRunOptions) NewAPIServer() (*apiserver.APIServer, error) {
 	apiServer := &apiserver.APIServer{
 		Config: s.Config,
 	}
