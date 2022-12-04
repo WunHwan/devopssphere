@@ -7,8 +7,8 @@ import (
 )
 
 type ManagementInterface interface {
-	CreateNamespace(*api.Workspace) (*api.Workspace, error)
-	GetWorkspace(workspace string) (*api.Workspace, error)
+	CreateNamespace(workspace string) error
+	FindWorkspace(workspace string) (*api.Workspace, error)
 	DeleteWorkspace(workspace string) error
 	ListWorkspace()
 }
@@ -23,14 +23,25 @@ func NewOperator(db *gorm.DB) ManagementInterface {
 	}
 }
 
-func (o *tenantOperator) CreateNamespace(workspace *api.Workspace) (*api.Workspace, error) {
-	//TODO implement me
-	panic("implement me")
+func (o *tenantOperator) CreateNamespace(workspace string) error {
+	_, err := sql.CreateWorkspace(o.db, workspace)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (o *tenantOperator) GetWorkspace(workspace string) (*api.Workspace, error) {
-	//TODO implement me
-	panic("implement me")
+func (o *tenantOperator) FindWorkspace(workspace string) (*api.Workspace, error) {
+	one, err := sql.QueryOne(o.db, workspace)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.Workspace{
+		Name:      one.Name,
+		CreatedAt: one.CreatedAt,
+		UpdatedAt: one.UpdatedAt,
+	}, nil
 }
 
 func (o *tenantOperator) ListWorkspace() {

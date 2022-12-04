@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/spf13/cobra"
 	"io.github/devopssphere/cmd/ds-apiserver/app/options"
+	"io.github/devopssphere/pkg/apiserver"
 	apiServerConfig "io.github/devopssphere/pkg/apiserver/config"
 	"io.github/devopssphere/pkg/simple/client/db"
+	"io.github/devopssphere/pkg/storage/tenant"
 	signals "io.github/devopssphere/pkg/utils"
 	"log"
 	"net/http"
@@ -79,6 +81,10 @@ func run(s *options.ServerRunOptions, ctx context.Context) error {
 		return err
 	}
 	apiserver.Database = database
+	err = autoMigrationTable(apiserver)
+	if err != nil {
+		return err
+	}
 
 	err = apiserver.PrepareRun(ctx.Done())
 	if err != nil {
@@ -90,4 +96,10 @@ func run(s *options.ServerRunOptions, ctx context.Context) error {
 		return nil
 	}
 	return err
+}
+
+func autoMigrationTable(s *apiserver.APIServer) error {
+	database := s.Database
+
+	return database.AutoMigrate(&tenant.Workspace{})
 }

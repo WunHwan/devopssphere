@@ -2,7 +2,6 @@ package apiserver
 
 import (
 	"context"
-	"fmt"
 	"github.com/emicklei/go-restful"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -30,8 +29,10 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 	s.container = restful.NewContainer()
 	s.container.Router(restful.CurlyRouter{})
 
+	s.installDevopsAPIs()
+
 	for _, ws := range s.container.RegisteredWebServices() {
-		fmt.Println(ws)
+		s.Log.Sugar().Infof("%s", ws.RootPath())
 	}
 
 	s.Server.Handler = s.container
@@ -41,7 +42,8 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 }
 
 func (s *APIServer) installDevopsAPIs() {
-	_ = apiTenant.AddToContainer(s.container, tenant.NewOperator(s.Database))
+	log := s.Log.Sugar()
+	_ = apiTenant.AddToContainer(s.container, log, tenant.NewOperator(s.Database))
 
 }
 

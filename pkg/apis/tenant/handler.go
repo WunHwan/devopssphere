@@ -1,40 +1,52 @@
 package tenant
 
 import (
+	"errors"
 	"github.com/emicklei/go-restful"
-	api "io.github/devopssphere/pkg/api/tenant"
+	"go.uber.org/zap"
 	"io.github/devopssphere/pkg/models/tenant"
 	"net/http"
 )
 
+const (
+	parameterWorkspaceBadRequest = "workspace cannot be empty"
+)
+
 type Handler struct {
+	log      *zap.SugaredLogger
 	operator tenant.ManagementInterface
 }
 
-func NewTenantHandler(operator tenant.ManagementInterface) *Handler {
+func NewTenantHandler(log *zap.SugaredLogger, operator tenant.ManagementInterface) *Handler {
 	return &Handler{
+		log:      log,
 		operator: operator,
 	}
 }
 
 func (h *Handler) CreateWorkspace(req *restful.Request, resp *restful.Response) {
-	workspace := new(api.Workspace)
-	var err error
-
-	err = req.ReadEntity(&workspace)
-	if err != nil {
-		_ = resp.WriteError(http.StatusBadRequest, err)
+	workspace := req.QueryParameter("workspace")
+	if len(workspace) == 0 {
+		_ = resp.WriteError(http.StatusBadRequest, errors.New(parameterWorkspaceBadRequest))
 		return
 	}
 
-	workspace, err = h.operator.CreateNamespace(workspace)
-	if err != nil {
+	if err := h.operator.CreateNamespace(workspace); err != nil {
 		_ = resp.WriteError(http.StatusInternalServerError, err)
 		return
 	}
+}
 
-	err = resp.WriteAsJson(workspace)
-	if err != nil {
+func (h *Handler) FindWorkspace(req *restful.Request, resp *restful.Response) {
+	workspace := req.QueryParameter("workspace")
+	if len(workspace) == 0 {
+		_ = resp.WriteError(http.StatusBadRequest, errors.New(parameterWorkspaceBadRequest))
+		return
+	}
 
+	if workspace, err := h.operator.FindWorkspace(workspace); err != nil {
+		_ = resp.WriteError(http.StatusInternalServerError, err)
+	} else if err = resp.WriteAsJson(workspace); err != nil {
+		h.log.Errorf("tenant find-workspace response error: %s", err.Error())
 	}
 }

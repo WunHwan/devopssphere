@@ -11,6 +11,10 @@ type Workspace struct {
 	UpdatedAt time.Time `gorm:"updated_at"`
 }
 
+func (Workspace) TableName() string {
+	return "devopsspshere_workspace"
+}
+
 func CreateWorkspace(tx *gorm.DB, name string) (*Workspace, error) {
 	var workspace = Workspace{
 		Name: name,
@@ -24,4 +28,13 @@ func CreateWorkspace(tx *gorm.DB, name string) (*Workspace, error) {
 
 func DeleteWorkspace(tx *gorm.DB, name string) error {
 	return tx.Delete(&Workspace{Name: name}).Error
+}
+
+func QueryOne(tx *gorm.DB, name string) (*Workspace, error) {
+	workspace := new(Workspace)
+	if err := tx.Where("name=?", name).Find(workspace).Error; err != nil {
+		return nil, err
+	}
+
+	return workspace, nil
 }
